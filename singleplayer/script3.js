@@ -643,6 +643,7 @@ function performBotMove() {
         adj.classList.contains(botColor)
       ) {
         playerScores[botColor] -= edge.weight;
+        dScore -= edge.weight;
       }
     });
     updateScoreDisplay();
