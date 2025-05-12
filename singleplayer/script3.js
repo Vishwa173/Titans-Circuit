@@ -550,6 +550,8 @@ function handlePlacement(node) {
 function performBotMove() {
   if (gameEnded) return;
 
+  dScore = 0;
+
   const botColor = "blue";
   let bestMove = null;
   let maxScoreGain = -Infinity;
@@ -650,6 +652,7 @@ function performBotMove() {
 
     handleMoveEnd(chosenMove.toNode);
   }
+  console.log(dScore);
 }
 
 function handleMoveStart(node) {
