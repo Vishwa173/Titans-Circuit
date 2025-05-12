@@ -378,7 +378,7 @@ function checkForSurroundedOpponents(node) {
 
             playerPieces[opponent].pop();
 
-            console.log(playerPieces);
+            //console.log(playerPieces);
             
           });
         } else {
@@ -497,7 +497,7 @@ function handlePlacement(node) {
   }else {
     moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,0, playerScores[currentPlayer]]);
   }
-  console.log(moveStack);
+  //console.log(moveStack);
   undoStack.length = 0;
 
   checkForSurroundedOpponents(node);
@@ -522,7 +522,7 @@ function handlePlacement(node) {
   updateCurrentTurnDisplay();
   moveTimer = moveTime;     
   startTimers();   
-  console.log(moveStack);
+  //console.log(moveStack);
 }
 
 function handleMoveStart(node) {
@@ -674,6 +674,8 @@ function handleMoveStart(node) {
     const nodeId = node.dataset.nodeId;
     const neighbors = getAdjacentNodes(node);
 
+    dScore = 0;
+
     subtractedEdges = [];
     neighbors.forEach(adj => {
     const adjId = adj.dataset.nodeId;
@@ -681,11 +683,11 @@ function handleMoveStart(node) {
       if (adj.classList.contains("occupied") && adj.classList.contains(currentPlayer)) {
         const key = [nodeId, adjId].sort().join("-");
         const edge = edgeMap[key];
-        dScore = -(edge.weight);
 
         if (edge) {
           playerScores[currentPlayer] -= edge.weight;
           subtractedEdges.push(edge);
+          dScore -= edge.weight;
           updateScoreDisplay();
           //console.log(playerScores);
         }
@@ -696,12 +698,14 @@ function handleMoveStart(node) {
       playerScores[currentPlayer] += edge.weight;
     });
     subtractedEdges = [];
+    dScore = 0;
   
     selectedTitan.classList.remove("selected");
     selectedTitan = null;
     clearHighlights();
     updateScoreDisplay();
   }
+  //console.log(dScore);
 }
 
 function handleMoveEnd(node) {
@@ -762,9 +766,10 @@ function handleMoveEnd(node) {
         if (adj.classList.contains("occupied") && adj.classList.contains(currentPlayer)) {
           const key = [nodeId, adjId].sort().join("-");
           const edge = edgeMap[key];
-          dScore = edge.weight;
+          //dScore = edge.weight;
 
           if (edge) {
+            dScore += edge.weight;
             playerScores[currentPlayer] += edge.weight;
             updateScoreDisplay();
             //console.log(playerScores);
@@ -815,6 +820,7 @@ function handleMoveEnd(node) {
     selectedTitan = null;
     clearHighlights();
   }
+  //console.log(moveStack);
 }
 
 function endGame(winnerPlayer) {
@@ -941,9 +947,7 @@ function undoMove() {
       break;
     }
   }
-  console.log('Undoing move by', player, 'Score delta:', dScore);
-
-  console.log(playerScores);
+  //console.log(playerScores);
   updateScoreDisplay();
 }
 
@@ -1104,18 +1108,6 @@ for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
   }
 
   const svg = document.getElementById("edge-layer");
-  /*const board = document.querySelector(".board");
-  const boardRect = board.getBoundingClientRect();
-
-  const nodeElems = document.querySelectorAll(".node");
-
-  const nodeCenters = Array.from(nodeElems).map(el => {
-    const rect = el.getBoundingClientRect();
-    return {
-      x: rect.left + rect.width / 2 - boardRect.left,
-      y: rect.top + rect.height / 2 - boardRect.top
-    };
-  });*/
 
   const boardWidth = board.clientWidth;
   const boardHeight = board.clientHeight;

@@ -515,7 +515,7 @@ function handlePlacement(node) {
   }else {
     moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,0, playerScores[currentPlayer]]);
   }
-  console.log(moveStack);
+  //console.log(moveStack);
   undoStack.length = 0;
 
   checkForSurroundedOpponents(node);
@@ -804,6 +804,8 @@ function handleMoveStart(node) {
     const nodeId = node.dataset.nodeId;
     const neighbors = getAdjacentNodes(node);
 
+    dScore = 0;
+
     subtractedEdges = [];
     neighbors.forEach(adj => {
     const adjId = adj.dataset.nodeId;
@@ -811,11 +813,11 @@ function handleMoveStart(node) {
       if (adj.classList.contains("occupied") && adj.classList.contains(currentPlayer)) {
         const key = [nodeId, adjId].sort().join("-");
         const edge = edgeMap[key];
-        dScore = -(edge.weight);
 
         if (edge) {
           playerScores[currentPlayer] -= edge.weight;
           subtractedEdges.push(edge);
+          dScore -= edge.weight;
           updateScoreDisplay();
         }
      }
@@ -825,6 +827,7 @@ function handleMoveStart(node) {
       playerScores[currentPlayer] += edge.weight;
     });
     subtractedEdges = [];
+    dScore = 0;
   
     selectedTitan.classList.remove("selected");
     selectedTitan = null;
@@ -842,7 +845,7 @@ function handleMoveEnd(node) {
   });
 
   if (validMoves.includes(node)) {
-    console.log(selectedTitan);
+    //console.log(selectedTitan);
     const img = selectedTitan.querySelector("img");
     const startRect = selectedTitan.getBoundingClientRect();
     const endRect = node.getBoundingClientRect();
@@ -890,9 +893,10 @@ function handleMoveEnd(node) {
         if (adj.classList.contains("occupied") && adj.classList.contains(currentPlayer)) {
           const key = [nodeId, adjId].sort().join("-");
           const edge = edgeMap[key];
-          dScore = edge.weight;
+          //dScore = edge.weight;
 
           if (edge) {
+            dScore += edge.weight;
             playerScores[currentPlayer] += edge.weight;
             updateScoreDisplay();
           }
@@ -983,7 +987,7 @@ function endGame(winnerPlayer) {
   clearInterval(totalInterval);
   clearInterval(moveInterval);
 
-  console.log(moveStack);
+  //console.log(moveStack);
 }
 
 function undoMove() {
@@ -1072,9 +1076,8 @@ function undoMove() {
       break;
     }
   }
-  console.log('Undoing move by', player, 'Score delta:', dScore);
 
-  console.log(playerScores);
+  //console.log(playerScores);
   updateScoreDisplay();
 }
 
