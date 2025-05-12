@@ -1,0 +1,242 @@
+body {
+    margin: 0;
+    font-family: 'EtArtilux', sans-serif;    
+    background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
+    color: white;
+    display: flex;
+    background-image: url('../images/home2.jpg');
+    background-size: cover;           
+    background-position: center;     
+    background-repeat: no-repeat; 
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  @font-face {
+    font-family: 'EtArtilux';
+    src: url('../font/EtArtiluxRegular-ARRvD.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }  
+
+  .container {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.6); 
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    font-family: 'EtArtilux', sans-serif; 
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+    max-width: 400px;
+    width: 90%;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-family: 'EtArtilux', sans-serif; 
+    margin-bottom: 20px;
+    color: #00ffff;
+  }
+
+  input[type="number"] {
+    padding: 12px;
+    margin: 10px 0;
+    font-family: 'EtArtilux', sans-serif; 
+    border: none;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .button {
+    background-color: cyan;
+    color: black;
+    border: none;
+    padding: 12px 20px;
+    margin: 10px 0;
+    font-family: 'EtArtilux', sans-serif;
+    font-weight: bold;
+    font-size: 2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px cyan;
+  }
+
+  .button:hover {
+    background-color: #00ffff;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+  }
+
+ .button:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 5px cyan, inset 0 0 10px #00ffff;
+  }
+
+  #instructions-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  
+  #instructions-btn img {
+    width: 40px;
+    height: 40px;
+    display: block;
+  }  
+  
+  #instructions-btn img:hover {
+    transform: scale(1.1);
+  }  
+
+  .leaderboard-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    font-family: 'EtArtilux', sans-serif;
+  }
+  
+  .leaderboard-content {
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid #00ffff;
+    color: #ffffff;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ffffaa;
+  }
+  
+  .leaderboard-content h2 {
+    font-size: 28px;
+    color: #00ffff;
+    margin-bottom: 20px;
+  }
+  
+  #leaderboardList {
+    list-style-type: none;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  #leaderboardList li {
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff55;
+    border-radius: 12px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    font-size: 16px;
+    transition: background 0.2s;
+  }
+  
+  #leaderboardList li:hover {
+    background-color: rgba(0, 255, 255, 0.2);
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    background: transparent;
+    color: #00ffff;
+    border: none;
+    cursor: pointer;
+    font-family: 'EtArtilux', sans-serif;
+  } 
+
+  .instructions-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    backdrop-filter: blur(6px);
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    font-family: 'EtArtilux', sans-serif;
+  }
+  
+  .instructions-content {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #00ffff;
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 0 20px #00ffffaa;
+    position: relative;
+    text-align: left;
+  }
+  
+  .instructions-content h2 {
+    color: #00ffff;
+    font-size: 2.5 rem;
+    margin-bottom: 15px;
+  }
+  
+  .instructions-content p {
+    font-size: 5 rem;
+    line-height: 1.5;
+  }
+  
+  #instructions-btn:hover img {
+    filter: brightness(1.2);
+    transform: scale(1.05);
+    transition: transform 0.2s ease, filter 0.2s ease;
+  }
+  
+  #instructions-btn:active img {
+    transform: scale(0.95);
+    filter: brightness(0.9);
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #00ffff;
+    cursor: pointer;
+  }
+  
+
+  @media (max-width: 500px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    input, button {
+      font-size: 0.9rem;
+      padding: 10px;
+    }
+
+    .container {
+      padding: 30px 20px;
+    }
+  }
+  

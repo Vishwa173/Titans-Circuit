@@ -1,0 +1,554 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: 'EtArtilux';
+  src: url('./font/EtArtiluxRegular-ARRvD.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background-image: url(./images/bg6.jpg);
+  background-size: cover;           
+  background-position: center;     
+  background-repeat: no-repeat; 
+}
+
+.game-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background-color: transparent;
+  overflow: visible;
+}
+
+.board-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  background-color: transparent;
+  width: 70vw; 
+  height: auto; 
+  margin-left: 0; 
+}
+
+.board {
+  position: absolute;
+  width: 100%;   
+  height: 100%;
+  max-height: 1000px;
+}
+
+/*.game-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+.board-container {
+  flex: 7;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: black;
+  width: 70vw;
+  height: auto; 
+  margin-left: auto;
+  margin-right: auto
+}
+
+.board {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  max-height: 1000px;
+  width: 70vw;
+}*/
+
+.game-title {
+  font-family: 'EtArtilux', sans-serif;
+  font-size: 5rem;
+  text-align: center;
+  color: white;
+  margin-top: 20px;
+  margin-bottom: 0px;
+}
+
+
+#edge-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/*body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: sans-serif;
+  background-color: black;
+  color: #fff;
+}
+
+.game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  overflow: hidden;
+}
+
+.board-container {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: black;
+  overflow: hidden;
+}
+
+.board {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 1000px; 
+  max-height: 1000px;
+}*/
+
+.svg-layer {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
+  width: 70vw;
+}
+
+
+/*.svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0; 
+}*/
+
+
+.ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.node {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color:#ffffff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+  z-index: 2;
+}
+
+.edge {
+  position: absolute;
+  height: 4px;
+  background-color: greenyellow;
+  transform-origin: center;
+  z-index: 1;
+}
+
+.ui-panel {
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2); 
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 20px;
+  width: 300px;
+  height: auto;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  font-family: 'EtArtilux', sans-serif;
+  color: white;
+  text-align: center;
+  z-index: 100;
+  overflow-y: auto;
+}
+
+/*.ui-panel {
+  flex: 3;
+  height: 100vh;
+  background-color: #1e1e2f;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}*/
+
+/*.ui-panel {
+  width: 30vw;
+  height: 100vh;
+  background-color: #1e1e2f;
+  color: #fff;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ui-panel h2 {
+  margin-bottom: 1rem;
+}*/
+
+button {
+  margin: 5px 0;
+  padding: 8px;
+  font-size: 30px;
+  font-family: inherit;
+  border: none;
+  border-radius: 6px;
+  background-color: #9b4dca;
+  color: white;
+  cursor: pointer;
+  height: 40px;
+}
+
+button:hover {
+  background-color: #ffff00;
+  color: black;
+}
+
+.ui-panel button:active {
+  transform: scale(0.95); 
+  box-shadow: 0 0 5px #ff1493 inset; 
+}
+
+.stacked-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.player-section {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+  height: 100px;
+  font-size: 22px;
+}
+
+.red-player {
+  color: #ff3131;
+}
+
+.blue-player {
+  color: #1e90ff;
+}
+
+/*.ui-panel button {
+  padding: 10px 15px;
+  margin: 5px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ui-panel button:hover {
+  background-color: #444;
+}
+
+.controls .control-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.player-section {
+  background-color: #292940;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.red-player h3 {
+  color: #ff4c4c;
+}
+
+.blue-player h3 {
+  color: #4c8bff;
+}*/
+
+#pauseToggleBtn {
+  position: relative;
+  z-index: 11;
+}
+
+#pauseOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  display: none;
+}
+
+#currentTurn{
+  font-size: 25px;
+}
+
+.weight-label {
+  position: absolute;
+  transform: translate(-20%, -35%);
+  font-family: 'EtArtilux', sans-serif;
+  font-size: 23px;
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0px 0px;
+  border-radius: 0px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.titan-image {
+  width: 80px;
+  height: 80px;
+  position: absolute;
+  transform: translate(-40%, -40%);
+  pointer-events: none;
+}
+
+.node.highlight {
+  outline: 3px solid yellow;
+  box-shadow: 0 0 10px yellow;
+  z-index: 1;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.7); }
+}
+
+.titan-image.fade-out {
+  animation: fadeOut 0.4s forwards;
+}
+
+.unlocked {
+  border: 2px solid gold;
+}
+
+.node img {
+  transition: none !important;
+}
+
+.popup {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: #a04a68;
+  color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#gameEndImage {
+  width: 100px;
+  height: 100px;
+}
+
+.popup-text {
+  font-family: 'EtArtilux', sans-serif;
+  font-size: 1.2rem;
+  margin-top: 1rem;
+}
+
+.close {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px #00ffff);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px #00ffff);
+  }
+}
+
+.circuit-line {
+  stroke: #00ffff;
+  stroke-width: 1;
+  animation: pulse 2s infinite;
+  filter: drop-shadow(0 0 2px #00ffff);
+}
+
+#historyBtn {
+  width: 40px;
+  height: 40px;
+  background-image: url('./images/history-icon.png'); /* Adjust path if needed */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+#historyBtn:active {
+  transform: scale(0.95);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.history-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(5px);
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-popup-content {
+  background: rgba(255, 255, 255, 0.95);
+  color: black;
+  padding: 20px;
+  border-radius: 15px;
+  width: 500px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'EtArtilux', sans-serif;
+  font-size: larger;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  position: relative;
+}
+
+.close-btn {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+#history-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+#history-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid #ccc;
+  font-size: 20px;
+}
+
+.replay-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family:'EtArtilux', sans-serif ;
+  background-color: #9b4dca;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+.replay-btn:hover {
+  background-color: #ffff00;
+  color: black;
+}
+
+.replay-btn:active {
+  transform: scale(0.95); 
+  box-shadow: 0 0 5px #ff1493 inset; 
+}
+
+@media screen and (max-width: 1000px) {
+  .game-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+  }
+
+  .board-container {
+    width: 100vw;
+    height: 50vh;
+    
+  }
+
+  .ui-panel {
+    width: 40vw;
+    margin-top: 40vh;
+    margin-right: 7vw;
+    height: auto;
+    overflow-y: visible;
+    position: static;
+  }
+
+  button{
+      width: 30vw;
+      font-size: 20px;
+      height: 30px;
+      margin-left: 1.5rem;
+      position: static;
+  }
+
+  .player-section{
+      font-size: 15px;
+  }
+
+  .titan-image{
+    height: 40px;
+    width: 40px;
+  }
+}
