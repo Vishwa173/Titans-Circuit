@@ -30,7 +30,6 @@ body {
     font-family: 'EtArtilux', sans-serif; 
     padding: 40px;
     border-radius: 16px;
-    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
     max-width: 400px;
     width: 90%;
   }

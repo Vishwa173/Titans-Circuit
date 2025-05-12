@@ -1,4 +1,8 @@
+const clickSound = new Audio("../audio/click-audio.wav");
+
 document.getElementById("multiplayerBtn").addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
     const circuits = document.getElementById("circuits").value;
     const nodes = document.getElementById("nodes").value;
     if (!circuits || !nodes) {
@@ -10,6 +14,8 @@ document.getElementById("multiplayerBtn").addEventListener("click", () => {
 });
 
 document.getElementById("singlePlayerBtn").addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   const circuits = document.getElementById("circuits").value;
   const nodes = document.getElementById("nodes").value;
   if (!circuits || !nodes) {
@@ -51,6 +57,8 @@ window.addEventListener("load", () => {
 
   
 document.getElementById("leaderboardBtn").addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   const leaderboardPopup = document.getElementById("leaderboardPopup");
   const leaderboardList = document.getElementById("leaderboardList");
 
@@ -72,17 +80,17 @@ document.getElementById("leaderboardBtn").addEventListener("click", () => {
 
   if (first) {
     const firstPlace = document.createElement("li");
-    firstPlace.textContent = `🥇 1st Place: Player ${first[0].toUpperCase()} - ${first[1]} wins`;
+    firstPlace.textContent = `1st Place: Player ${first[0].toUpperCase()} - ${first[1]} wins`;
     leaderboardList.appendChild(firstPlace);
   }
 
   if (second) {
     const secondPlace = document.createElement("li");
-    secondPlace.textContent = `🥈 2nd Place: Player ${second[0].toUpperCase()} - ${second[1]} wins`;
+    secondPlace.textContent = `2nd Place: Player ${second[0].toUpperCase()} - ${second[1]} wins`;
     leaderboardList.appendChild(secondPlace);
   } else {
     const secondPlace = document.createElement("li");
-    secondPlace.textContent = `🥈 2nd Place: N/A`;
+    secondPlace.textContent = `2nd Place: N/A`;
     leaderboardList.appendChild(secondPlace);
   }
 
@@ -90,6 +98,8 @@ document.getElementById("leaderboardBtn").addEventListener("click", () => {
 });
   
 document.getElementById("closeLeaderboardBtn").addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   document.getElementById("leaderboardPopup").style.display = "none";
 });
 
@@ -98,10 +108,14 @@ const instructionsPopup = document.getElementById("instructionsPopup");
 const closeInstructions = document.getElementById("closeInstructions");
 
 instructionsBtn.addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   instructionsPopup.style.display = "flex";
 });
 
 closeInstructions.addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   instructionsPopup.style.display = "none";
 });
 

@@ -51,34 +51,6 @@ html, body {
   max-height: 1000px;
 }
 
-/*.game-container {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-}
-
-.board-container {
-  flex: 7;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background-color: black;
-  width: 70vw;
-  height: auto; 
-  margin-left: auto;
-  margin-right: auto
-}
-
-.board {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  max-height: 1000px;
-  width: 70vw;
-}*/
-
 .game-title {
   font-family: 'EtArtilux', sans-serif;
   font-size: 5rem;
@@ -99,40 +71,6 @@ html, body {
   z-index: 0;
 }
 
-/*body, html {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: sans-serif;
-  background-color: black;
-  color: #fff;
-}
-
-.game-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  overflow: hidden;
-}
-
-.board-container {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: black;
-  overflow: hidden;
-}
-
-.board {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 1000px; 
-  max-height: 1000px;
-}*/
-
 .svg-layer {
   position: absolute;
   width: 100%;
@@ -141,18 +79,6 @@ html, body {
   pointer-events: none;
   width: 70vw;
 }
-
-
-/*.svg-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0; 
-}*/
-
 
 .ring {
   position: absolute;
@@ -198,34 +124,6 @@ html, body {
   z-index: 100;
   overflow-y: auto;
 }
-
-/*.ui-panel {
-  flex: 3;
-  height: 100vh;
-  background-color: #1e1e2f;
-  color: white;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-}*/
-
-/*.ui-panel {
-  width: 30vw;
-  height: 100vh;
-  background-color: #1e1e2f;
-  color: #fff;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  font-family: 'Segoe UI', sans-serif;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.ui-panel h2 {
-  margin-bottom: 1rem;
-}*/
 
 button {
   margin: 5px 0;
@@ -323,6 +221,40 @@ button:hover {
   background: rgba(0, 0, 0, 0.4);
   z-index: 10;
   display: none;
+}
+
+.powerup-section {
+  margin-top: 5px;
+  text-align: center;
+}
+
+button:disabled,
+.disabled-btn {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+button:disabled:hover,
+.disabled-btn:hover {
+  background-color: inherit;
+  color: inherit;
+}
+
+#swapPowerupRedBtn {
+  border: none;
+  font-size: 20px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#swapPowerupBlueBtn {
+  font-size: 20px;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 #currentTurn{

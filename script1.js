@@ -31,6 +31,12 @@ const maxTitans = 4;
 let bufferScore = 0;
 let moveText;
 let dScore;
+let gameEnded = false;
+let swapModeActive = false;
+let firstSwapNode = null;
+let secondSwapNode = null;
+let redSwapUsed = false;
+let blueSwapUsed = false;
 
 const playerPieces = {
   red: [],
@@ -62,6 +68,7 @@ const placementSound = new Audio("./audio/placement-audio.wav");
 const movementSound = new Audio("./audio/movement-audio.wav");
 movementSound.volume = 1;
 const surroundSound = new Audio("./audio/surround-audio.wav");
+const clickSound = new Audio("./audio/click-audio.wav");
 
 /*function updateUI() {
   document.getElementById("turn").innerText = `Current Turn: ${currentPlayer.charAt(0).toUpperCase() + currentPlayer.slice(1)}`;
@@ -76,6 +83,9 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("watchReplayBtn").addEventListener("click", async () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
+
   document.getElementById("watchReplayBtn").disabled = true; 
   document.getElementById("gameEndPopup").style.display = "none";
 
@@ -87,7 +97,9 @@ document.getElementById("watchReplayBtn").addEventListener("click", async () => 
 });
 
 document.getElementById("pauseToggleBtn").addEventListener("click", () => {
-  //console.log("Pause toggle clicked");
+  //console.log("toggle");
+  clickSound.currentTime = 0;
+  clickSound.play();
   isPaused = !isPaused;
   document.getElementById("pauseToggleBtn").textContent = isPaused ? "Resume" : "Pause";
   if (isPaused){
@@ -99,10 +111,15 @@ document.getElementById("pauseToggleBtn").addEventListener("click", () => {
 });
 
 document.getElementById("resetBtn").addEventListener("click", () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
+  gameEnded = false;
   location.reload(); 
 });
 
 document.querySelector('#historyBtn').addEventListener('click', () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   const historyList = document.getElementById('history-list');
   historyList.innerHTML = ''; 
   moveHistory.forEach(move => {
@@ -114,11 +131,49 @@ document.querySelector('#historyBtn').addEventListener('click', () => {
 });
 
 document.getElementById('close-history').addEventListener('click', () => {
+  clickSound.currentTime = 0;
+  clickSound.play();
   document.getElementById('history-popup').classList.add('hidden');
 });
 
 document.getElementById("undoBtn").addEventListener("click", undoMove);
 document.getElementById("redoBtn").addEventListener("click", redoMove);
+
+document.getElementById("swapPowerupRedBtn").addEventListener("click", () => {
+  if (currentPlayer !== "red" || redSwapUsed) return;
+
+  swapModeActive = !swapModeActive;
+
+  if (swapModeActive) {
+    firstSwapNode = null;
+    secondSwapNode = null;
+    alert("Red swap mode activated! Click your titan, then opponent's.");
+  } else {
+    alert("Red swap mode cancelled.");
+  }
+});
+
+document.getElementById("swapPowerupBlueBtn").addEventListener("click", () => {
+  if (currentPlayer !== "blue" || blueSwapUsed) return;
+
+  swapModeActive = !swapModeActive;
+
+  if (swapModeActive) {
+    firstSwapNode = null;
+    secondSwapNode = null;
+    alert("Blue swap mode activated! Click your titan, then opponent's.");
+  } else {
+    alert("Blue swap mode cancelled.");
+  }
+});
+
+function getOpponent(player) {
+  return player === "red" ? "blue" : "red";
+}
+
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 function clearBoard() {
   const occupiedNodes = document.querySelectorAll(".occupied");
@@ -142,6 +197,24 @@ function isInnermostRingFull() {
   return Object.values(nodeMap)
     .filter(node => node.ring === 0)
     .every(node => node.occupiedBy !== null);
+}
+
+function recalculateScores() {
+  playerScores.red = 0;
+  playerScores.blue = 0;
+
+  for (const key in edgeMap) {
+    const edge = edgeMap[key];
+    const [n1, n2] = edge.nodes;
+    const p1 = nodeMap[n1].occupiedBy;
+    const p2 = nodeMap[n2].occupiedBy;
+
+    if (p1 && p1 === p2) {
+      playerScores[p1] += edge.weight;
+    }
+  }
+
+  updateScoreDisplay();
 }
 
 function getScoreWinner() {
@@ -205,6 +278,8 @@ function switchCurrentPlayer() {
 }
 
 function startTimers() {
+  if (gameEnded) return;
+
   clearInterval(moveInterval);
   clearInterval(totalInterval);
 
@@ -378,7 +453,7 @@ function updateScoreDisplay() {
 
 function handlePlacement(node) {
   const ring = parseInt(node.dataset.ring);
-  if (ring != unlockedRingIndex) return;
+  if (ring < unlockedRingIndex) return;
   if (node.classList.contains("occupied")) return;
   if (playerPieces[currentPlayer].length >= maxTitans) return;
   if (isPaused) return;
@@ -393,6 +468,8 @@ function handlePlacement(node) {
 
   const nodeId = node.dataset.nodeId;
   const neighbors = getAdjacentNodes(node);
+
+  let dScore = 0;
 
   neighbors.forEach(adj => {
     const adjId = adj.dataset.nodeId;
@@ -416,9 +493,9 @@ function handlePlacement(node) {
   moveText = `${currentPlayer} was placed on ${node.dataset.nodeId}`;
   moveHistory.push(moveText);
   if (dScore){
-    moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,dScore]);
+    moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,dScore, playerScores[currentPlayer]]);
   }else {
-    moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,0]);
+    moveStack.push([0, 0, node.dataset.nodeId, currentPlayer,0, playerScores[currentPlayer]]);
   }
   console.log(moveStack);
   undoStack.length = 0;
@@ -445,10 +522,148 @@ function handlePlacement(node) {
   updateCurrentTurnDisplay();
   moveTimer = moveTime;     
   startTimers();   
+  console.log(moveStack);
 }
 
 function handleMoveStart(node) {
   if (isPaused) return;
+
+  if (swapModeActive) {
+    if (!firstSwapNode) {
+      if (node.classList.contains("occupied") && node.classList.contains(currentPlayer)) {
+        firstSwapNode = node;
+        node.classList.add("selected");
+      } else {
+        alert("Select your own titan first.");
+      }
+    } else if (!secondSwapNode) {
+      if (node.classList.contains("occupied") && !node.classList.contains(currentPlayer)) {
+        secondSwapNode = node;
+  
+        const firstId = firstSwapNode.dataset.nodeId;
+        const secondId = secondSwapNode.dataset.nodeId;
+  
+        const firstImg = firstSwapNode.querySelector("img");
+        const secondImg = secondSwapNode.querySelector("img");
+  
+        if (!firstImg || !secondImg) {
+          alert("Swap failed: one of the titans is missing.");
+          return;
+        }
+  
+        const opponent = currentPlayer === "red" ? "blue" : "red";
+  
+        const firstClone = firstImg.cloneNode(true);
+        const secondClone = secondImg.cloneNode(true);
+  
+        const fromRect = firstSwapNode.getBoundingClientRect();
+        const toRect = secondSwapNode.getBoundingClientRect();
+  
+        firstImg.style.visibility = "hidden";
+        secondImg.style.visibility = "hidden";
+  
+        document.body.appendChild(firstClone);
+        document.body.appendChild(secondClone);
+  
+        Object.assign(firstClone.style, {
+          position: "absolute",
+          top: `${fromRect.top + window.scrollY}px`,
+          left: `${fromRect.left + window.scrollX}px`,
+          width: `${firstImg.width}px`,
+          height: `${firstImg.height}px`,
+          pointerEvents: "none",
+          transition: "top 1s ease-in-out, left 1s ease-in-out",
+          zIndex: 1000
+        });
+  
+        Object.assign(secondClone.style, {
+          position: "absolute",
+          top: `${toRect.top + window.scrollY}px`,
+          left: `${toRect.left + window.scrollX}px`,
+          width: `${secondImg.width}px`,
+          height: `${secondImg.height}px`,
+          pointerEvents: "none",
+          transition: "top 1s ease-in-out, left 1s ease-in-out",
+          zIndex: 1000
+        });
+  
+        requestAnimationFrame(() => {
+          firstClone.style.top = `${toRect.top + window.scrollY}px`;
+          firstClone.style.left = `${toRect.left + window.scrollX}px`;
+  
+          secondClone.style.top = `${fromRect.top + window.scrollY}px`;
+          secondClone.style.left = `${fromRect.left + window.scrollX}px`;
+        });
+  
+        firstClone.addEventListener("transitionend", () => {
+          firstClone.remove();
+          secondClone.remove();
+  
+          firstImg.style.visibility = "visible";
+          secondImg.style.visibility = "visible";
+  
+          firstSwapNode.innerHTML = "";
+          secondSwapNode.innerHTML = "";
+          firstSwapNode.appendChild(secondImg);
+          secondSwapNode.appendChild(firstImg);
+  
+          firstSwapNode.classList.remove(currentPlayer);
+          firstSwapNode.classList.add(opponent);
+  
+          secondSwapNode.classList.remove(opponent);
+          secondSwapNode.classList.add(currentPlayer);
+  
+          nodeMap[firstId].occupiedBy = opponent;
+          nodeMap[secondId].occupiedBy = currentPlayer;
+  
+          const oldScore = playerScores[currentPlayer];
+          recalculateScores();
+          const newScore = playerScores[currentPlayer];
+          const dscore = newScore - oldScore;
+  
+          moveHistory.push(`${currentPlayer} used swap powerup on ${firstId} and ${secondId}`);
+          moveStack.push([3, firstId, secondId, currentPlayer, dscore, newScore]);
+          undoStack.length = 0;
+  
+          const originalPlayer = currentPlayer;
+          const opponents = currentPlayer === "red" ? "blue" : "red";
+  
+          currentPlayer = opponents;
+          checkForSurroundedOpponents(firstSwapNode);
+  
+          currentPlayer = originalPlayer;
+          checkForSurroundedOpponents(secondSwapNode);
+  
+          currentPlayer = originalPlayer;
+  
+          firstSwapNode.classList.remove("selected");
+          firstSwapNode = null;
+          secondSwapNode = null;
+          swapModeActive = false;
+  
+          if (currentPlayer === "red") {
+            redSwapUsed = true;
+            const redBtn = document.getElementById("swapPowerupRedBtn");
+            redBtn.disabled = true;
+            redBtn.classList.add("disabled-btn");
+          } else {
+            blueSwapUsed = true;
+            const blueBtn = document.getElementById("swapPowerupBlueBtn");
+            blueBtn.disabled = true;
+            blueBtn.classList.add("disabled-btn");
+          }          
+  
+          updateScoreDisplay();
+          updateCurrentTurnDisplay();
+          switchCurrentPlayer();
+        });
+      } else {
+        alert("Now select opponent's titan to swap.");
+      }
+    }
+  
+    return;
+  }  
 
   if (node.classList.contains("occupied") && node.classList.contains(currentPlayer) && !selectedTitan) {
     selectedTitan = node;
@@ -476,24 +691,6 @@ function handleMoveStart(node) {
         }
      }
     });
-
-    /*for (let key in edgeMap) {
-      const edge = edgeMap[key];
-      if (edge.nodes.includes(nodeId)) {
-        const [n1, n2] = edge.nodes;
-        const otherNodeId = n1 === nodeId ? n2 : n1;
-
-        const otherNode = document.querySelector(`[data-node-id='${otherNodeId}']`);
-        if (
-          otherNode &&
-          otherNode.classList.contains("occupied") &&
-          otherNode.classList.contains(currentPlayer)
-        ) {
-          playerScores[currentPlayer] -= edge.weight;
-          updateScoreDisplay(currentPlayer);
-        }
-      }
-    }*/
   }else{
     subtractedEdges.forEach(edge => {
       playerScores[currentPlayer] += edge.weight;
@@ -585,9 +782,9 @@ function handleMoveEnd(node) {
       moveText = `${currentPlayer} moved from ${selectedTitan.dataset.nodeId} to ${node.dataset.nodeId}`;
       moveHistory.push(moveText);
       if (Math.abs(dScore)){
-      moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, dScore]);
+      moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, dScore, playerScores[currentPlayer]]);
       }else {
-        moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, 0]);
+        moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, 0, playerScores[currentPlayer]]);
       }
       undoStack.length = 0;
 
@@ -625,38 +822,46 @@ function endGame(winnerPlayer) {
   const popupText = document.getElementById("gameEndText");
   const popupImage = document.getElementById("gameEndImage");
 
-  popupText.textContent = `Player ${winnerPlayer} WON THE GAME!`;
+  if (winnerPlayer === "draw") {
+    popupText.textContent = "The game ended in a draw!";
+    popupImage.src = `./images/drawTitan.png`;
+  } else {
+    popupText.textContent = `Player ${winnerPlayer} WON THE GAME!`;
+    popupImage.src = winnerPlayer === "red"
+      ? `./images/redTitan.png`
+      : `./images/blueTitan.png`;
 
-  popupImage.src = winnerPlayer === "red"
-    ? "images/redTitan.png"
-    : "images/blueTitan.png";
+    const leaderboard = JSON.parse(localStorage.getItem("titanLeaderboard")) || { red: 0, blue: 0 };
+    leaderboard[winnerPlayer]++;
+    localStorage.setItem("titanLeaderboard", JSON.stringify(leaderboard));
+  }
 
   popup.style.display = "flex";
 
   const gameOverAudio = new Audio("./audio/gameover-audio.mp3");
   gameOverAudio.play();
 
-  const leaderboard = JSON.parse(localStorage.getItem("titanLeaderboard")) || { red: 0, blue: 0 };
-  leaderboard[winnerPlayer]++;
-  localStorage.setItem("titanLeaderboard", JSON.stringify(leaderboard));
-
   gameEnded = true;
 
-  playerScores[red] = 0;
-  playerScores[blue] = 0;
+  playerScores.red = 0;
+  playerScores.blue = 0;
 
   updateScoreDisplay();
 
-  clearInterval(currentTotalTimeElement);
+  clearInterval(totalInterval);
+  clearInterval(moveInterval);
+
   console.log(moveStack);
   //console.log([data-nodeID= moveStack[0][2]]);
 }
 
 function undoMove() {
+  clickSound.currentTime = 0;
+  clickSound.play();
   if (moveStack.length === 0) return;
 
-  const [action, from, to, player, dScore] = moveStack.pop();
-  undoStack.push([action, from, to, player, dScore]);
+  const [action, from, to, player, dScore, score] = moveStack.pop();
+  undoStack.push([action, from, to, player, dScore, score]);
   playerScores[player] -= dScore;
 
   currentPlayer = player;
@@ -702,6 +907,39 @@ function undoMove() {
       playerPieces[player].push(node);
       break;
     }
+
+    case 3: {
+      const firstNode = document.querySelector(`[data-node-id="${from}"]`);
+      const secondNode = document.querySelector(`[data-node-id="${to}"]`);
+
+      const firstImg = firstNode.querySelector("img");
+      const secondImg = secondNode.querySelector("img");
+
+      const opponent = player === "red" ? "blue" : "red";
+
+      firstNode.classList.remove(opponent);
+      firstNode.classList.add(player);
+
+      secondNode.classList.remove(player);
+      secondNode.classList.add(opponent);
+
+      const firstClone = firstImg.cloneNode(true);
+      const secondClone = secondImg.cloneNode(true);
+
+      firstNode.innerHTML = "";
+      secondNode.innerHTML = "";
+
+      firstNode.appendChild(secondClone);
+      secondNode.appendChild(firstClone); 
+
+      nodeMap[from].occupiedBy = player;
+      nodeMap[to].occupiedBy = opponent;
+
+      if (player === "red") redSwapUsed = false;
+      else blueSwapUsed = false;
+
+      break;
+    }
   }
   console.log('Undoing move by', player, 'Score delta:', dScore);
 
@@ -710,10 +948,12 @@ function undoMove() {
 }
 
 function redoMove() {
+  clickSound.currentTime = 0;
+  clickSound.play();
   if (undoStack.length === 0) return;
 
-  const [action, from, to, player, dScore] = undoStack.pop();
-  moveStack.push([action, from, to, player, dScore]);
+  const [action, from, to, player, dScore, score] = undoStack.pop();
+  moveStack.push([action, from, to, player, dScore, score]);
 
   currentPlayer = player;
   moveTimer = moveTime;
@@ -757,6 +997,32 @@ function redoMove() {
       playerPieces[player].pop();
       break;
     }
+
+    case 3: {
+      const firstNode = document.querySelector(`[data-node-id="${from}"]`);
+      const secondNode = document.querySelector(`[data-node-id="${to}"]`);
+      const opponent = player === "red" ? "blue" : "red";
+
+      const firstImg = firstNode.querySelector("img");
+      const secondImg = secondNode.querySelector("img");
+
+      firstNode.classList.remove(opponent);
+      secondNode.classList.remove(player);
+      firstNode.classList.add(player);
+      secondNode.classList.add(opponent);
+
+      const firstClone = firstImg.cloneNode(true);
+      const secondClone = secondImg.cloneNode(true);
+      firstNode.innerHTML = "";
+      secondNode.innerHTML = "";
+      firstNode.appendChild(secondClone);
+      secondNode.appendChild(firstClone);
+
+      nodeMap[from].occupiedBy = player;
+      nodeMap[to].occupiedBy = opponent;
+
+      break;
+    }
   }
 
   playerScores[player] += dScore;
@@ -765,11 +1031,6 @@ function redoMove() {
   updateCurrentTurnDisplay();
   updateScoreDisplay();
 }
-
-/*const gameBoard = document.querySelector(".board");
-const boardSize = gameBoard.offsetWidth; 
-const center = 50;
-const maxRadius = 40;*/
 
 for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
   const ring = document.createElement("div");
@@ -820,6 +1081,11 @@ for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
     };
 
     node.addEventListener("click", () => {
+      if (swapModeActive) {
+        handleMoveStart(node); 
+        return;
+      }
+
       if (node.classList.contains("occupied") && node.classList.contains(currentPlayer)) {
         handleMoveStart(node);  
       }
@@ -877,23 +1143,6 @@ for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
 
     svg.appendChild(line);
 
-    /*const cur = nodes[i];
-    const next = nodes[(i + 1) % nodes.length];
-  
-    const x1 = cur.x + 500;
-    const y1 = cur.y+360;
-    const x2 = next.x + 500;
-    const y2 = next.y+360;
-  
-    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    line.setAttribute("x1", x1);
-    line.setAttribute("y1", y1);
-    line.setAttribute("x2", x2);
-    line.setAttribute("y2", y2);
-    line.setAttribute("stroke", "green");
-    line.setAttribute("stroke-width", "5");
-  
-    svg.appendChild(line);*/
     const mpX = ((cur.x + next.x)) / 2;
     const mpY = ((cur.y + next.y)) / 2; //not responsive
 
@@ -998,7 +1247,7 @@ async function replayMoves(moveStack, index = 0) {
     return;
   }
 
-  const [actionType, fromNodeId, toNodeId, player, score] = moveStack[index];
+  const [actionType, fromNodeId, toNodeId, player,dScore, score] = moveStack[index];
   currentPlayer = player;
   const fromNode = document.querySelector(`[data-node-id="${fromNodeId}"]`);
   const toNode = document.querySelector(`[data-node-id="${toNodeId}"]`);     
@@ -1060,7 +1309,84 @@ async function replayMoves(moveStack, index = 0) {
     nodeMap[fromNodeId].occupiedBy = null;
   }
 
-  playerScores[player] += score;
+  if (actionType === 3) {
+    const firstImg = fromNode.querySelector("img");
+    const secondImg = toNode.querySelector("img");
+
+    const firstClone = firstImg.cloneNode(true);
+    const secondClone = secondImg.cloneNode(true);
+
+    const fromRect = fromNode.getBoundingClientRect();
+    const toRect = toNode.getBoundingClientRect();
+
+    firstImg.style.visibility = "hidden";
+    secondImg.style.visibility = "hidden";
+
+    document.body.appendChild(firstClone);
+    document.body.appendChild(secondClone);
+
+    Object.assign(firstClone.style, {
+      position: "absolute",
+      top: `${fromRect.top + window.scrollY}px`,
+      left: `${fromRect.left + window.scrollX}px`,
+      width: `${firstImg.width}px`,
+      height: `${firstImg.height}px`,
+      pointerEvents: "none",
+      transition: "top 1s ease-in-out, left 1s ease-in-out",
+      zIndex: 1000
+    });
+
+    Object.assign(secondClone.style, {
+      position: "absolute",
+      top: `${toRect.top + window.scrollY}px`,
+      left: `${toRect.left + window.scrollX}px`,
+      width: `${secondImg.width}px`,
+      height: `${secondImg.height}px`,
+      pointerEvents: "none",
+      transition: "top 1s ease-in-out, left 1s ease-in-out",
+      zIndex: 1000
+    });
+
+    requestAnimationFrame(() => {
+      firstClone.style.top = `${toRect.top + window.scrollY}px`;
+      firstClone.style.left = `${toRect.left + window.scrollX}px`;
+
+      secondClone.style.top = `${fromRect.top + window.scrollY}px`;
+      secondClone.style.left = `${fromRect.left + window.scrollX}px`;
+    });
+
+    await new Promise((resolve) => {
+      firstClone.addEventListener("transitionend", () => {
+        firstClone.remove();
+        secondClone.remove();
+
+        fromNode.innerHTML = "";
+        toNode.innerHTML = "";
+
+        fromNode.appendChild(secondImg);
+        toNode.appendChild(firstImg);
+
+        firstImg.style.visibility = "visible";
+        secondImg.style.visibility = "visible";
+
+        const firstPlayer = nodeMap[fromNodeId].occupiedBy;
+        const secondPlayer = nodeMap[toNodeId].occupiedBy;
+
+        fromNode.classList.remove(firstPlayer, secondPlayer);
+        toNode.classList.remove(firstPlayer, secondPlayer);
+
+        fromNode.classList.add(secondPlayer);
+        toNode.classList.add(firstPlayer);
+
+        nodeMap[fromNodeId].occupiedBy = secondPlayer;
+        nodeMap[toNodeId].occupiedBy = firstPlayer;
+
+        resolve();
+      });
+    });
+  }
+
+  playerScores[player] = score;
 
   updateScoreDisplay();
 
@@ -1076,5 +1402,3 @@ window.addEventListener("DOMContentLoaded", () => {
 //console.log(moveHistory);
 //console.log(edgeMap);
 //console.log(nodeMap);
-
-
