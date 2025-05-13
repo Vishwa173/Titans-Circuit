@@ -91,6 +91,11 @@ document.getElementById("watchReplayBtn").addEventListener("click", async () => 
 
   clearBoard();
 
+  playerScores.red = 0;
+  playerScores.blue = 0;
+
+  updateScoreDisplay();
+
   await new Promise(resolve => setTimeout(resolve, 200));
 
   await replayMoves(moveStack); 
@@ -617,12 +622,15 @@ function handleMoveStart(node) {
           nodeMap[secondId].occupiedBy = currentPlayer;
   
           const oldScore = playerScores[currentPlayer];
+          const oldOpponentScore = playerScores[opponent];          
           recalculateScores();
           const newScore = playerScores[currentPlayer];
           const dscore = newScore - oldScore;
+          const newOpponentScore = playerScores[opponent];
+          const dscoreOpponent = newOpponentScore - oldOpponentScore;
   
           moveHistory.push(`${currentPlayer} used swap powerup on ${firstId} and ${secondId}`);
-          moveStack.push([3, firstId, secondId, currentPlayer, dscore, newScore]);
+          moveStack.push([3, firstId, secondId, currentPlayer, dscore, newScore, dscoreOpponent]);
           undoStack.length = 0;
   
           const originalPlayer = currentPlayer;
@@ -849,10 +857,10 @@ function endGame(winnerPlayer) {
 
   gameEnded = true;
 
-  playerScores.red = 0;
+  /*playerScores.red = 0;
   playerScores.blue = 0;
 
-  updateScoreDisplay();
+  updateScoreDisplay();*/
 
   clearInterval(totalInterval);
   clearInterval(moveInterval);
@@ -866,9 +874,15 @@ function undoMove() {
   clickSound.play();
   if (moveStack.length === 0) return;
 
-  const [action, from, to, player, dScore, score] = moveStack.pop();
-  undoStack.push([action, from, to, player, dScore, score]);
+  const moveData = moveStack.pop();
+  const [action, from, to, player, dScore, score, dScoreOpponent] = moveData;
+  undoStack.push(moveData);
+
   playerScores[player] -= dScore;
+  if (action === 3) {
+    const opponent = player === "red" ? "blue" : "red";
+    playerScores[opponent] -= dScoreOpponent;
+  }
 
   currentPlayer = player;
   moveTimer = moveTime;
@@ -956,8 +970,8 @@ function redoMove() {
   clickSound.play();
   if (undoStack.length === 0) return;
 
-  const [action, from, to, player, dScore, score] = undoStack.pop();
-  moveStack.push([action, from, to, player, dScore, score]);
+  const [action, from, to, player, dScore, score, dScoreOpponent] = undoStack.pop();
+  moveStack.push([action, from, to, player, dScore, score, dScoreOpponent]);
 
   currentPlayer = player;
   moveTimer = moveTime;
@@ -1030,8 +1044,14 @@ function redoMove() {
   }
 
   playerScores[player] += dScore;
+  if (action === 3) {
+    const opponent = player === "red" ? "blue" : "red";
+    playerScores[opponent] += dScoreOpponent;
+  }
 
+  if (action !== 2) {
   currentPlayer = currentPlayer === "red" ? "blue" : "red";
+  }
   updateCurrentTurnDisplay();
   updateScoreDisplay();
 }
