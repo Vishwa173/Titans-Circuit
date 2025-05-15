@@ -545,13 +545,14 @@ function handlePlacement(node) {
   currentPlayer = currentPlayer == "red" ? "blue" : "red";
 
   if (currentPlayer === "blue") {
-  setTimeout(botTurn, 300);
+  setTimeout(botTurn, 500);
 }
   
   updateCurrentTurnDisplay();
   updateCurrentTurnDisplay();
   moveTimer = moveTime;     
-  startTimers();   
+  startTimers();  
+  //console.log(unlockedRingIndex); 
 }
 
 function performBotMove() {
@@ -659,7 +660,7 @@ function performBotMove() {
 
     handleMoveEnd(chosenMove.toNode);
   }
-  console.log(dScore);
+  //console.log(dScore);
 }
 
 function handleMoveStart(node) {
@@ -687,14 +688,14 @@ function handleMoveStart(node) {
           alert("Swap failed: one of the titans is missing.");
           return;
         }
-  
+
         const opponent = currentPlayer === "red" ? "blue" : "red";
   
         const firstClone = firstImg.cloneNode(true);
         const secondClone = secondImg.cloneNode(true);
   
         const fromRect = firstSwapNode.getBoundingClientRect();
-        const toRect = secondSwapNode.getBoundingClientRect();
+        const toRect = secondSwapNode.getBoundingClientRect();       
   
         firstImg.style.visibility = "hidden";
         secondImg.style.visibility = "hidden";
@@ -738,7 +739,9 @@ function handleMoveStart(node) {
   
           firstImg.style.visibility = "visible";
           secondImg.style.visibility = "visible";
-  
+
+          console.log(secondSwapNode); 
+
           firstSwapNode.innerHTML = "";
           secondSwapNode.innerHTML = "";
           firstSwapNode.appendChild(secondImg);
@@ -851,6 +854,9 @@ function handleMoveStart(node) {
 }
 
 function handleMoveEnd(node) {
+  const titanElement = selectedTitan;
+  if (!titanElement) return;
+
   if (isPaused) return;
 
   const validMoves = getAdjacentNodes(selectedTitan).filter(n => {
@@ -888,7 +894,8 @@ function handleMoveEnd(node) {
     animImg.addEventListener("transitionend", () => {
       
       animImg.remove();
-      const fromNode = selectedTitan.closest(".node");      
+     //console.log(selectedTitan);
+      const fromNode = titanElement.closest(".node");      
 
       fromNode.classList.remove("occupied", currentPlayer, "selected");
       fromNode.innerHTML = "";
@@ -924,12 +931,12 @@ function handleMoveEnd(node) {
       movementSound.play();
       nodeMap[nodeId].occupiedBy = currentPlayer;
 
-      moveText = `${currentPlayer} moved from ${selectedTitan.dataset.nodeId} to ${node.dataset.nodeId}`;
+      moveText = `${currentPlayer} moved from ${titanElement.dataset.nodeId} to ${node.dataset.nodeId}`;
       moveHistory.push(moveText);
       if (Math.abs(dScore)){
-      moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, dScore, playerScores[currentPlayer]]);
+      moveStack.push([1, titanElement.dataset.nodeId, node.dataset.nodeId, currentPlayer, dScore, playerScores[currentPlayer]]);
       }else {
-        moveStack.push([1, selectedTitan.dataset.nodeId, node.dataset.nodeId, currentPlayer, 0, playerScores[currentPlayer]]);
+        moveStack.push([1, titanElement.dataset.nodeId, node.dataset.nodeId, currentPlayer, 0, playerScores[currentPlayer]]);
       }
       undoStack.length = 0;
 
@@ -951,7 +958,7 @@ function handleMoveEnd(node) {
       currentPlayer = currentPlayer === "red" ? "blue" : "red";
 
       if (currentPlayer === "blue") {
-        setTimeout(botTurn, 300);
+        setTimeout(botTurn, 500);
       }
       
       updateCurrentTurnDisplay();
@@ -1055,7 +1062,7 @@ function undoMove() {
       const node = document.querySelector(`[data-node-id="${from}"]`);
       node.classList.add("occupied", player);
       const titanImg = document.createElement("img");
-      titanImg.src = `./images/${player}Titan.png`;
+      titanImg.src = `../images2/${player}Titan.png`;
       titanImg.classList.add("titan-image");
       node.appendChild(titanImg);
       nodeMap[from].occupiedBy = player;
@@ -1090,8 +1097,17 @@ function undoMove() {
       nodeMap[from].occupiedBy = player;
       nodeMap[to].occupiedBy = opponent;
 
-      if (player === "red") redSwapUsed = false;
-      else blueSwapUsed = false;
+      if (player === "red") {
+        redSwapUsed = false;
+        const redBtn = document.getElementById("swapPowerupRedBtn");
+        redBtn.disabled = false;
+        redBtn.classList.remove("disabled-btn");
+      } else {
+        blueSwapUsed = false;
+        const blueBtn = document.getElementById("swapPowerupBlueBtn");
+        blueBtn.disabled = false;
+        blueBtn.classList.remove("disabled-btn");
+      }
 
       break;
     }
@@ -1119,7 +1135,7 @@ function redoMove() {
       const node = document.querySelector(`[data-node-id="${to}"]`);
       node.classList.add("occupied", player);
       const titanImg = document.createElement("img");
-      titanImg.src = `./images/${player}Titan.png`;
+      titanImg.src = `../images2/${player}Titan.png`;
       titanImg.classList.add("titan-image");
       node.appendChild(titanImg);
       nodeMap[to].occupiedBy = player;
@@ -1175,6 +1191,18 @@ function redoMove() {
       nodeMap[from].occupiedBy = player;
       nodeMap[to].occupiedBy = opponent;
 
+      if (player === "red") {
+        redSwapUsed = true;
+        const redBtn = document.getElementById("swapPowerupRedBtn");
+        redBtn.disabled = true;
+        redBtn.classList.add("disabled-btn");
+      } else {
+        blueSwapUsed = true;
+        const blueBtn = document.getElementById("swapPowerupBlueBtn");
+        blueBtn.disabled = true;
+        blueBtn.classList.add("disabled-btn");
+      }
+
       break;
     }
   }
@@ -1198,7 +1226,7 @@ for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
 
   const radius = (ringNum / RINGS) * radiusBase;
   const nodes = [];
-  const weight = baseWeight - (ringNum - baseWeight) * increment;
+  const weight = baseWeight + (RINGS - 1 - ringNum) * increment;
 
   for (let i = 0; i < NODES_PER_RING; i++) {
 
@@ -1304,7 +1332,7 @@ for (let i = 0; i < RINGS - 1; i++) {
   const inner = allRings[i];
   const outer = allRings[i + 1];
   const innerRing = board.children[i+1];
-  const weight = baseWeight - (i - 1) * increment;
+  const weight = baseWeight + (RINGS - 2 - i) * increment;
 
   const svg = document.getElementById("edge-layer");
 

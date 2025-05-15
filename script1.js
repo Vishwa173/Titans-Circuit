@@ -955,8 +955,17 @@ function undoMove() {
       nodeMap[from].occupiedBy = player;
       nodeMap[to].occupiedBy = opponent;
 
-      if (player === "red") redSwapUsed = false;
-      else blueSwapUsed = false;
+      if (player === "red") {
+        redSwapUsed = false;
+        const redBtn = document.getElementById("swapPowerupRedBtn");
+        redBtn.disabled = false;
+        redBtn.classList.remove("disabled-btn");
+      } else {
+        blueSwapUsed = false;
+        const blueBtn = document.getElementById("swapPowerupBlueBtn");
+        blueBtn.disabled = false;
+        blueBtn.classList.remove("disabled-btn");
+      }
 
       break;
     }
@@ -1039,6 +1048,18 @@ function redoMove() {
       nodeMap[from].occupiedBy = player;
       nodeMap[to].occupiedBy = opponent;
 
+      if (player === "red") {
+        redSwapUsed = true;
+        const redBtn = document.getElementById("swapPowerupRedBtn");
+        redBtn.disabled = true;
+        redBtn.classList.add("disabled-btn");
+      } else {
+        blueSwapUsed = true;
+        const blueBtn = document.getElementById("swapPowerupBlueBtn");
+        blueBtn.disabled = true;
+        blueBtn.classList.add("disabled-btn");
+      }
+
       break;
     }
   }
@@ -1063,7 +1084,7 @@ for (let ringNum = 1; ringNum <= RINGS; ringNum++) {
   //const radiusPercent = (ringNum / RINGS) * maxRadius;
   const radius = (ringNum / RINGS) * radiusBase;
   const nodes = [];
-  const weight = baseWeight - (ringNum - baseWeight) * increment;
+  const weight = baseWeight + (RINGS - 1 - ringNum) * increment;
 
   for (let i = 0; i < NODES_PER_RING; i++) {
     /*const angleDeg = (360 / NODES_PER_RING) * i;
@@ -1196,7 +1217,7 @@ for (let i = 0; i < RINGS - 1; i++) {
   const inner = allRings[i];
   const outer = allRings[i + 1];
   const innerRing = board.children[i+1];
-  const weight = baseWeight - (i - 1) * increment;
+  const weight = baseWeight + (RINGS - 2 - i) * increment;
 
   const svg = document.getElementById("edge-layer");
 
